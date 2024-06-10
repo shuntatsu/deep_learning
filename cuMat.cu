@@ -6,15 +6,6 @@
 #include "cuMat.h"
 using namespace std;
 
-cuMat::cuMat::cuMat(int rows, int cols) : rows(rows), cols(cols)
-{
-    cublasCreate(&cudaHandle);
-    cudaMallocManaged(&mDevice, rows * cols * sizeof(float));
-    mHost = mDevice;
-    cudaDeviceSynchronize();
-}
-
-
 cuMat::cuMat(const cuMat &a) : rows(a.rows), cols(a.cols)
 {
     cublasCreate(&cudaHandle);
