@@ -1,6 +1,18 @@
 #include "mat_sqrt_kernel.h"
 #define BLOCK_SIZE 32
 
+/*
+device:
+    デバイス(GPU)上で実行される関数につける修飾子
+    __device__関数は、カーネル関数(__global__関数)や他の__device__関数から呼び出すことができる
+    ホスト(CPU)コードからは直接呼び出せない
+global:
+    カーネル関数につける修飾子。カーネル関数はデバイス(GPU)上で実行される
+    ホスト(CPU)コードから呼び出すことができる。その際、実行設定(グリッド、ブロックサイズなど)を指定する
+    __global__関数からは、他の__global__関数を呼び出せない
+    戻り値の型はvoidでなければならない
+*/
+
 // GPU上で実行,インライン化を強制
 __device__ __forceinline__ float mat_sqrt (float a, float alpha){
     return std::sqrt(a+alpha);
