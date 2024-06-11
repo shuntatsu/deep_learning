@@ -6,9 +6,28 @@
 #include "cuMat.h"
 using namespace std;
 
+/*
+コピーコンストラクタです。既存のcuMatオブジェクトを引数に取り、そのオブジェクトと同じ内容の新しいcuMatオブジェクトを作成します。
+コピーコンストラクタの特徴は:
+  クラス自身の型の参照を1つだけ引数に取る
+  引数はconst参照である
+  新しいオブジェクトを引数のオブジェクトと同じ状態に初期化する
+コピーコンストラクタは、以下のような場面で暗黙的に呼び出されます:
+  関数の引数渡しでオブジェクトがコピーされるとき
+  関数の戻り値でオブジェクトが返されるとき
+  オブジェクトを別のオブジェクトで初期化するとき (例: cuMat mat2 = mat1;)
+*/
+cuMat(int rows, int cols)
+{
+    cublasCreate(&cudaHandle);
+    cudThreadSynchronize();
+    new matrix(rows, cols);
+}
+
 cuMat::cuMat(const cuMat &a) : rows(a.rows), cols(a.cols)
 {
     cublasCreate(&cudaHandle);
+    // ホストとデバイスの両方からアクセス可能なメモリを割り当て
     cudaMallocManaged(&mDevice, rows * cols * sizeof(float));
     mHost = mDevice;
     cudaDeviceSynchronize();
