@@ -17,17 +17,34 @@ using namespace std;
   関数の戻り値でオブジェクトが返されるとき
   オブジェクトを別のオブジェクトで初期化するとき (例: cuMat mat2 = mat1;)
 */
+/* 
+関数: cuMat
+    コンストラクタ。行列のサイズを指定して初期化する。
+引数:
+    rows: 行列の行数
+    cols: 行列の列数  
+戻り値:
+    なし
+*/
 cuMat(int rows, int cols)
 {
     cublasCreate(&cudaHandle);
     cudThreadSynchronize();
-    new matrix(rows, cols);
+    new matrix(rows, cols); // ここは new_matrix(rows, cols) の呼び出しにすべき
 }
 
+/*
+関数: cuMat 
+    コピーコンストラクタ。他の cuMat オブジェクトからディープコピーを作成する。
+引数:
+    a: コピー元の cuMat オブジェクト
+戻り値:
+    なし
+*/
 cuMat::cuMat(const cuMat &a) : rows(a.rows), cols(a.cols)
 {
     cublasCreate(&cudaHandle);
-    // ホストとデバイスの両方からアクセス可能なメモリを割り当て
+    // ホストとデバイスの両方からアクセス可能なメモリを割り当て 
     cudaMallocManaged(&mDevice, rows * cols * sizeof(float));
     mHost = mDevice;
     cudaDeviceSynchronize();
@@ -43,17 +60,43 @@ cuMat::cuMat(const cuMat &a) : rows(a.rows), cols(a.cols)
     }
 }
 
+/*
+関数: ~cuMat
+    デストラクタ。割り当てたメモリを解放する。 
+引数:
+    なし
+戻り値:
+    なし
+*/
 cuMat::~cuMat()
 {
     cudaFree(mDevice);
     cublasDestroy(cudaHandle);
 }
 
+/*
+関数: new_matrix
+    行列のサイズを変更する。
+引数: 
+    rows: 新しい行数
+    cols: 新しい列数
+戻り値:
+    なし
+*/
 void cuMat::new_matrix(int rows, int cols)
 {
-    
+    // ここに行列のサイズ変更処理を実装する必要がある
+    // 古いメモリを解放し、新しいサイズでメモリを割り当てる
 }
 
+/*
+関数: print
+    行列の内容を標準出力に表示する。
+引数:
+    なし 
+戻り値:
+    なし
+*/
 void cuMat::print() const
 {
     for (int i = 0; i < rows; ++i)
@@ -66,30 +109,20 @@ void cuMat::print() const
     }
 }
 
+/*
+関数: plus
+    2つの行列の要素ごとの和を計算する。
+引数:
+    b: 加算する行列
+    r: 結果を格納する行列
+戻り値:
+    なし
+*/
 void cuMat::plus(const cuMat &b, cuMat &r)
 {
     float alpha = 1;
     float beta = 1;
 
-    /*
-    cublasSgeam:
-        C=α⋅A+β⋅B
-        ここで、A と B は入力行列、C は結果行列、alpha と beta はスカラー値です。
-
-    引数:
-    r.cudaHandle: CUBLASライブラリのハンドル。
-    CUBLAS_OP_N: 行列の転置を行わないことを示します。
-    rows: 行列の行数。
-    cols: 行列の列数。
-    &alpha: スカラー値 alpha のポインタ。
-    mDevice: 元の行列のデータを指すデバイスポインタ。
-    rows: 元の行列のリーディングディメンション（行数）。
-    &beta: スカラー値 beta のポインタ。
-    b.mDevice: 加算する行列 b のデータを指すデバイスポインタ。
-    rows: 加算する行列 b のリーディングディメンション（行数）。
-    r.mDevice: 結果を格納する行列 r のデータを指すデバイスポインタ。
-    r.rows: 結果を格納する行列 r のリーディングディメンション（行数）。
-    */
     cublasStatus_t stat = cublasSgeam(r.cudaHandle, CUBLAS_OP_N,
         CUBLAS_OP_N, rows, cols, &alpha, mDevice, rows, &beta,
         b.mDevice, rows, r.mDevice, r.rows);
@@ -101,6 +134,14 @@ void cuMat::plus(const cuMat &b, cuMat &r)
     cudaThreadSynchronize();
 }
 
+/*
+関数: operator=
+    代入演算子のオーバーロード。ディープコピーを実行する。
+引数:
+    a: 代入元の cuMat オブジェクト
+戻り値:
+    *this
+*/
 cuMat& cuMat::operator=(const cuMat &a) {
     new_matrix(a.rows, a.cols);
 
@@ -112,6 +153,15 @@ cuMat& cuMat::operator=(const cuMat &a) {
     return *this;
 }
 
+/*
+関数: operator+
+    加算演算子のオーバーロード。2つの cuMat オブジェクトの和を計算する。
+引数:
+    a: 左辺値の cuMat オブジェクト
+    b: 右辺値の cuMat オブジェクト 
+戻り値:
+    a と b の和である新しい cuMat オブジェクト
+*/
 cuMat operator+(const cuMat &a, const cuMat &b) {
     cuMat r = a;
     r.plus(b, r);
