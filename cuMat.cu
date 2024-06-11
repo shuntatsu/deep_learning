@@ -162,7 +162,7 @@ cuMat& cuMat::operator=(const cuMat &a) {
 戻り値:
     a と b の和である新しい cuMat オブジェクト
 */
-cuMat operator+(const cuMat &a, const cuMat &b) {
+friend cuMat operator+(const cuMat &a, const cuMat &b) {
     cuMat r = a;
     r.plus(b, r);
 
