@@ -123,6 +123,7 @@ void cuMat::plus(const cuMat &b, cuMat &r)
     float alpha = 1;
     float beta = 1;
 
+    // 2つの単精度実数行列の和を計算します。この関数を使うと、行列の足し算と同時に、転置や共役転置も効率的に行えます。
     cublasStatus_t stat = cublasSgeam(r.cudaHandle, CUBLAS_OP_N,
         CUBLAS_OP_N, rows, cols, &alpha, mDevice, rows, &beta,
         b.mDevice, rows, r.mDevice, r.rows);
